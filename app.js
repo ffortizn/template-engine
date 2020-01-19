@@ -1,5 +1,8 @@
 //void main void(){ ... }
 
+const inquirer = require('inquirer')
+const fs = require('fs')
+
 const htmlBegin = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -66,6 +69,7 @@ var htmlFile = '';
 const role = ['Manager', 'Engineer', 'Intern']
 
 const myAnswers = [];
+
 const manager = [{
     name: 'Francisco Ortiz',
     id: 101,
@@ -74,38 +78,6 @@ const manager = [{
 }]
 const engineer = [];
 const intern = [];
-
-const inquirer = require('inquirer')
-const fs = require('fs')
-
-function askQuestions() {
-    inquirer
-        .prompt([
-            {
-                message: 'What\'s your favorite color (for background color)?',
-                type: 'list',
-                name: 'color',
-                choices: color,
-                default: 'orange'
-            },
-            {
-                message: 'Enter github username:',
-                type: 'input',
-                name: 'username',
-                default: 'ffortizn'
-            },
-        ])
-        .then(answers => {
-            app.color = answers.color;
-            app.username = answers.username;
-            getGitProfile();
-            // generatePdf();
-        });
-}
-
-
-//var inquirer = require('inquirer');
-//var output = [];
 
 var questions = [
     {
@@ -130,12 +102,31 @@ var questions = [
         message: "Role:"
     }
     ,
-    //   {
-    //     type: 'confirm',
-    //     name: 'askAgain',
-    //     message: 'Enter another team mate?',
-    //     default: true
-    //   }
+    {
+        type: 'input',
+        name: 'office',
+        message: 'Office:',
+        when: function (answers) {
+            return answers.role === 'Manager';
+        }
+    },
+    {
+        type: 'input',
+        name: 'github',
+        message: 'Github:',
+        when: function (answers) {
+            return answers.role === 'Engineer';
+        }
+    },
+    {
+        type: 'input',
+        name: 'school',
+        message: 'School:',
+        when: function (answers) {
+            return answers.role === 'Intern';
+        }
+    }
+
 ];
 
 function ask() {
@@ -152,12 +143,9 @@ function ask() {
                 ask();
             } else {
                 console.info('\nGenerating team.html...');
-                //console.info(htmlBegin)
                 htmlTeam();
             }
-            // console.log(myAnswers)
         });
-        //output.push(answers.tvShow);
     });
 }
 
@@ -183,20 +171,20 @@ function htmlTeam() {
 
     //Manager
     str = htmlManager;
-    str = str.replace("{{Name}}", manager[0].name)
-    str = str.replace("{{ID}}", manager[0].id)
-    str = str.replace("{{Email}}", manager[0].email)
-    str = str.replace("{{Office}}", manager[0].office)
+    str = str.replace("{{Name}}", "Name: " + manager[0].name)
+    str = str.replace("{{ID}}", "ID: " + manager[0].id)
+    str = str.replace("{{Email}}", "Email: " + manager[0].email)
+    str = str.replace("{{Office}}", "Office: " + manager[0].office)
     htmlFile = htmlFile + htmlRow + str + "</div>";
 
     // Engineer
     htmlFile = htmlFile + htmlRow
     engineer.forEach(element => {
         str = htmlEngineer;
-        str = str.replace("{{Name}}", element.name)
-        str = str.replace("{{ID}}", element.id)
-        str = str.replace("{{Email}}", element.email)
-        str = str.replace("{{Github}}", element.github)
+        str = str.replace("{{Name}}", "Name: " + element.name)
+        str = str.replace("{{ID}}", "ID: " + element.id)
+        str = str.replace("{{Email}}", "Email: " + element.email)
+        str = str.replace("{{Github}}", "Github: " + element.github)
         htmlFile = htmlFile + str;
     });
     htmlFile = htmlFile + "</div>";
@@ -205,10 +193,10 @@ function htmlTeam() {
     htmlFile = htmlFile + htmlRow
     intern.forEach(element => {
         str = htmlIntern;
-        str = str.replace("{{Name}}", element.name)
-        str = str.replace("{{ID}}", element.id)
-        str = str.replace("{{Email}}", element.email)
-        str = str.replace("{{School}}", element.school)
+        str = str.replace("{{Name}}", "Name: " + element.name)
+        str = str.replace("{{ID}}", "ID: " + element.id)
+        str = str.replace("{{Email}}", "Email: " + element.email)
+        str = str.replace("{{School}}", "School: " + element.school)
         htmlFile = htmlFile + str;
     });
     htmlFile = htmlFile + "</div>";
@@ -216,7 +204,6 @@ function htmlTeam() {
 
     writeHtml(htmlFile);
 }
-
 
 function writeHtml(htmlFile) {
     fs.writeFile('./output/team.html', htmlFile, function (err) {
